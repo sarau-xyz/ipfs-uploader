@@ -12,7 +12,22 @@ export const config = {
 const post = async (req, res) => {
   const form = new formidable.IncomingForm();
   form.parse(req, async function (err, fields, files) {
-    const resp = await sendIpfs(files.file.filepath)
+    const resIpfs = await sendIpfs(files.file.filepath)
+
+
+    const resJson = await sendJson(
+      {      
+        name: files.file.originalFilename,
+        image: "ipfs://"+resIpfs.IpfsHash
+
+    })
+
+    const resp = {
+      name: files.file.originalFilename,
+      image: "ipfs://"+resJson.IpfsHash
+    }
+
+    
     return res.status(201).send(resp);
   });
 };
@@ -20,12 +35,12 @@ const post = async (req, res) => {
 
 
 const sendIpfs = async (file) => {
-    var data = new FormData();
+    const data = new FormData();
     data.append('file', fs.createReadStream(file)) ;
     data.append('pinataOptions', '{"cidVersion": 1}');
     data.append('pinataMetadata', '{"name": "MyFile", "keyvalues": {"company": "Pinata"}}');
 
-    var config = {
+    const config = {
         method: 'post',
         url: 'https://api.pinata.cloud/pinning/pinFileToIPFS',
         headers: { 
@@ -41,6 +56,25 @@ const sendIpfs = async (file) => {
     return res.data
     ;
 
+}
+
+const sendJson = async (data) => {
+  const dataJson = data;
+  
+  const config = {
+    method: 'post',
+    url: 'https://api.pinata.cloud/pinning/pinJSONToIPFS',
+    headers: { 
+      'Content-Type': 'application/json', 
+      authorization: "Bearer "+process.env.REACT_APP_PINATA_JWT
+    },
+    data : dataJson
+  };
+  
+  const res = await axios(config);
+  
+  console.log(res.data);
+  return res.data
 }
 
 export default (req, res) => {
