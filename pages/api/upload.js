@@ -17,17 +17,16 @@ const post = async (req, res) => {
 
     const resJson = await sendJson(
       {      
-        name: files.file.originalFilename,
+        name: fields.name,
         image: "ipfs://"+resIpfs.IpfsHash
 
     })
 
     const resp = {
-      name: files.file.originalFilename,
+      name: fields.name,
       image: "ipfs://"+resJson.IpfsHash
     }
-
-    
+    console.log(resp)    
     return res.status(201).send(resp);
   });
 };
