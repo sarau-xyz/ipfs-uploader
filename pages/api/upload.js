@@ -12,8 +12,8 @@ export const config = {
 const post = async (req, res) => {
   const form = new formidable.IncomingForm();
   form.parse(req, async function (err, fields, files) {
-    sendIpfs(files.file.filepath)
-    return res.status(201).send("");
+    const resp = sendIpfs(files.file.filepath)
+    return res.status(201).send(resp);
   });
 };
 
@@ -37,7 +37,9 @@ const sendIpfs = async (file) => {
 
     const res = await axios(config);
 
-    console.log(res.data);
+    console.log(res.data)
+    return res.data
+    ;
 
 }
 
