@@ -14,7 +14,7 @@ const post = async (req, res) => {
   form.parse(req, async function (err, fields, files) {
     console.log("fields=", fields);
     console.log("files=", files);
-    const resIpfs = await sendIpfs((files.file as formidable.File).filepath);
+    const resIpfs = await sendIpfs((files.file as formidable.File));
 
     const resJson = await sendJson({
       name: fields.name,
@@ -30,9 +30,9 @@ const post = async (req, res) => {
   });
 };
 
-const sendIpfs = async (file) => {
+const sendIpfs = async (file: formidable.File) => {
   const data = new FormData();
-  data.append("file", fs.createReadStream(file));
+  data.append("file", fs.readFileSync(file.filepath));
   data.append("pinataOptions", '{"cidVersion": 1}');
   data.append(
     "pinataMetadata",
