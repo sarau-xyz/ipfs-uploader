@@ -25,14 +25,12 @@ const post = async (req, res) => {
 };
 
 const sendIpfs = async (file: formidable.File): Promise<string> => {
-  const res = await pinata.pinFileToIPFS(fs.createReadStream(file.filepath));
-
+  const res = await pinata.pinFromFS(file.filepath);
   return res.IpfsHash;
 };
 
 const sendJson = async (data: Object): Promise<string> => {
   const res = await pinata.pinJSONToIPFS(data);
-
   return res.IpfsHash;
 };
 
