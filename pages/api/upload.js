@@ -2,6 +2,7 @@ import formidable from "formidable";
 import fs from "fs";
 import axios from 'axios';
 import FormData from 'form-data';
+import NextCors from 'nextjs-cors';
 
 export const config = {
   api: {
