@@ -73,18 +73,12 @@ const sendJson = async (data) => {
 };
 
 export default (req, res) => {
-  req.method === "POST"
-    ? post(req, res)
-    : req.method === "PUT"
-    ? console.log("PUT")
-    : req.method === "DELETE"
-    ? console.log("DELETE")
-    : req.method === "GET"
-    ? console.log("GET")
-    : req.method === "OPTIONS"
-    ? (() => {
-        res.setHeader("Allow", "POST");
-        return res.status(202).json({});
-      })()
-    : res.status(404);
+  if (req.method === "POST") {
+    post(req, res);
+  } else if (req.method === "OPTIONS") {
+    res.setHeader("Allow", "POST");
+    res.status(200).text("OK");
+  } else {
+    res.status(404);
+  }
 };
