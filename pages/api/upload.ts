@@ -2,6 +2,13 @@ import formidable from "formidable";
 import fs from "fs";
 import pinataSDK from "@pinata/sdk";
 
+export const config = {
+  api: {
+    bodyParser: false
+  }
+};
+
+
 const pinata = pinataSDK(
   process.env.PINATA_API_KEY,
   process.env.PINATA_API_SECRET
