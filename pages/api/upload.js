@@ -1,81 +1,76 @@
 import formidable from "formidable";
 import fs from "fs";
-import axios from 'axios';
-import FormData from 'form-data';
-import NextCors from 'nextjs-cors';
+import axios from "axios";
+import FormData from "form-data";
 
 export const config = {
   api: {
-    bodyParser: false
-  }
+    bodyParser: false,
+  },
 };
 
 const post = async (req, res) => {
   const form = new formidable.IncomingForm();
   form.parse(req, async function (err, fields, files) {
-    const resIpfs = await sendIpfs(files.file.filepath)
+    const resIpfs = await sendIpfs(files.file.filepath);
 
-
-    const resJson = await sendJson(
-      {      
-        name: fields.name,
-        image: "ipfs://"+resIpfs.IpfsHash
-
-    })
+    const resJson = await sendJson({
+      name: fields.name,
+      image: "ipfs://" + resIpfs.IpfsHash,
+    });
 
     const resp = {
       name: fields.name,
-      image: "ipfs://"+resJson.IpfsHash
-    }
-    console.log(resp)    
+      image: "ipfs://" + resJson.IpfsHash,
+    };
+    console.log(resp);
     return res.status(201).send(resp);
   });
 };
 
-
-
 const sendIpfs = async (file) => {
-    const data = new FormData();
-    data.append('file', fs.createReadStream(file)) ;
-    data.append('pinataOptions', '{"cidVersion": 1}');
-    data.append('pinataMetadata', '{"name": "MyFile", "keyvalues": {"company": "Pinata"}}');
+  const data = new FormData();
+  data.append("file", fs.createReadStream(file));
+  data.append("pinataOptions", '{"cidVersion": 1}');
+  data.append(
+    "pinataMetadata",
+    '{"name": "MyFile", "keyvalues": {"company": "Pinata"}}'
+  );
 
-    const config = {
-        method: 'post',
-        url: 'https://api.pinata.cloud/pinning/pinFileToIPFS',
-        headers: { 
-            authorization: "Bearer "+process.env.REACT_APP_PINATA_JWT,
-            ...data.getHeaders()
-        },
-        data : data
-        };
+  const config = {
+    method: "post",
+    url: "https://api.pinata.cloud/pinning/pinFileToIPFS",
+    headers: {
+      authorization: "Bearer " + process.env.REACT_APP_PINATA_JWT,
+      ...data.getHeaders(),
+    },
+    data: data,
+  };
 
-    const res = await axios(config);
+  const res = await axios(config);
 
-    console.log(res.data)
-    return res.data
-    ;
-
-}
+  console.log(res.data);
+  return res.data;
+};
 
 const sendJson = async (data) => {
   const dataJson = data;
-  
+
   const config = {
-    method: 'post',
-    url: 'https://api.pinata.cloud/pinning/pinJSONToIPFS',
-    headers: { 
-      'Content-Type': 'application/json', 
-      authorization: "Bearer "+process.env.REACT_APP_PINATA_JWT
+    method: "post",
+    url: "https://api.pinata.cloud/pinning/pinJSONToIPFS",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: "Bearer " + process.env.REACT_APP_PINATA_JWT,
     },
-    data : dataJson
+    data: dataJson,
   };
-  
+
   const res = await axios(config);
-  
+
   console.log(res.data);
-  return res.data
-}
+  return res.data;
+};
 
 export default (req, res) => {
   req.method === "POST"
@@ -86,5 +81,10 @@ export default (req, res) => {
     ? console.log("DELETE")
     : req.method === "GET"
     ? console.log("GET")
-    : res.status(404).send("");
+    : req.method === "OPTIONS"
+    ? (() => {
+        res.setHeader("Allow", "POST");
+        return res.status(202).json({});
+      })()
+    : res.status(404);
 };
