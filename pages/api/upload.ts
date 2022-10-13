@@ -1,77 +1,39 @@
 import formidable from "formidable";
 import fs from "fs";
-import axios from "axios";
-import FormData from "form-data";
+import pinataSDK from "@pinata/sdk";
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+const pinata = pinataSDK(
+  process.env.PINATA_API_KEY,
+  process.env.PINATA_API_SECRET
+);
 
 const post = async (req, res) => {
   const form = new formidable.IncomingForm();
   form.parse(req, async function (err, fields, files) {
-    console.log("fields=", fields);
-    console.log("files=", files);
-    const resIpfs = await sendIpfs((files.file as formidable.File));
+    const hashImage = await sendIpfs(files.file as formidable.File);
 
-    const resJson = await sendJson({
+    const hashJson = await sendJson({
       name: fields.name,
-      image: "ipfs://" + resIpfs.IpfsHash,
+      image: "ipfs://" + hashImage,
     });
 
-    const resp = {
+    return res.status(201).send({
       name: fields.name,
-      image: "ipfs://" + resJson.IpfsHash,
-    };
-    console.log(resp);
-    return res.status(201).send(resp);
+      image: "ipfs://" + hashJson,
+    });
   });
 };
 
-const sendIpfs = async (file: formidable.File) => {
-  const data = new FormData();
-  data.append("file", fs.readFileSync(file.filepath));
-  data.append("pinataOptions", '{"cidVersion": 1}');
-  data.append(
-    "pinataMetadata",
-    '{"name": "MyFile", "keyvalues": {"company": "Pinata"}}'
-  );
+const sendIpfs = async (file: formidable.File): Promise<string> => {
+  const res = await pinata.pinFileToIPFS(fs.createReadStream(file.filepath));
 
-  const config = {
-    method: "post",
-    url: "https://api.pinata.cloud/pinning/pinFileToIPFS",
-    headers: {
-      authorization: "Bearer " + process.env.REACT_APP_PINATA_JWT,
-      ...data.getHeaders(),
-    },
-    data: data,
-  };
-
-  const res = await axios(config);
-
-  console.log(res.data);
-  return res.data;
+  return res.IpfsHash;
 };
 
-const sendJson = async (data) => {
-  const dataJson = data;
+const sendJson = async (data: Object): Promise<string> => {
+  const res = await pinata.pinJSONToIPFS(data);
 
-  const config = {
-    method: "post",
-    url: "https://api.pinata.cloud/pinning/pinJSONToIPFS",
-    headers: {
-      "Content-Type": "application/json",
-      authorization: "Bearer " + process.env.REACT_APP_PINATA_JWT,
-    },
-    data: dataJson,
-  };
-
-  const res = await axios(config);
-
-  console.log(res.data);
-  return res.data;
+  return res.IpfsHash;
 };
 
 export default (req, res) => {

@@ -9,9 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@pinata/sdk": "^1.1.26",
     "FormData": "^0.10.1",
-    "axios": "^1.1.2",
-    "form-data": "^4.0.0",
     "formidable": "^2.0.1",
     "fs": "^0.0.1-security",
     "next": "12.3.1",
