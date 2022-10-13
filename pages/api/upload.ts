@@ -8,7 +8,12 @@ const pinata = pinataSDK(
 );
 
 const post = async (req, res) => {
-  const form = new formidable.IncomingForm();
+  const form = new formidable.IncomingForm({
+    maxFiles: 1,
+    maxFields: 2,
+    allowEmptyFiles: false,
+  });
+
   form.parse(req, async function (err, fields, files) {
     const hashImage = await sendIpfs(files.file as formidable.File);
 
