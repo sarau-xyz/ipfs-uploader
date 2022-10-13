@@ -12,7 +12,9 @@ export const config = {
 const post = async (req, res) => {
   const form = new formidable.IncomingForm();
   form.parse(req, async function (err, fields, files) {
-    const resIpfs = await sendIpfs(files.file.filepath);
+    console.log("fields=", fields);
+    console.log("files=", files);
+    const resIpfs = await sendIpfs((files.file as formidable.File).filepath);
 
     const resJson = await sendJson({
       name: fields.name,
