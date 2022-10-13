@@ -77,8 +77,8 @@ export default (req, res) => {
     post(req, res);
   } else if (req.method === "OPTIONS") {
     res.setHeader("Allow", "POST");
-    res.status(200).text("OK");
+    res.status(200).send("OK");
   } else {
-    res.status(404);
+    res.status(404).send();
   }
 };
