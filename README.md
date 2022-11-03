@@ -7,7 +7,7 @@ To use it, just put the credentials in the .env file.
 
 First, run the development server:
 
-Fork / clone this repo
-npm install
-npm run dev to test locally
-npm run deploy to deploy
+1. Fork / clone this repo
+2. npm install
+3. npm run dev to test locally
+4. npm run deploy to deploy
